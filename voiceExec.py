@@ -22,6 +22,7 @@ SILENCE_LIMIT = 3 #Silence limit in seconds. The max ammount of seconds where on
 p = pyaudio.PyAudio()
 configuration = ConfigParser.RawConfigParser()
 
+
 def loadConfig():
     print "Loading Configuration File"
 
@@ -102,7 +103,7 @@ def listen_for_speech():
             #the limit was reached, finish capture and deliver
             filename = save_speech(all_m,p)
 	    print filename
-            stt_google_wav(filename)
+            stt_google(filename)
             #reset all
             started = False
             slid_win = deque(maxlen=SILENCE_LIMIT*rel)
@@ -130,7 +131,21 @@ def save_speech(data, p):
     return filename
 
 
-def stt_google_wav(filename):
+
+def tts_google( string ):
+	#this will get the last remnants
+	#wget -q -U Mozilla -O "$tmpDir/tmp.mp3" "http://translate.google.com/translate_tts?tl=${lang}&q=$string"
+	#cat "$tmpDir/tmp.mp3" >> "$tmpDir/speak.mp3"
+    lang_code='en'
+    googl_speech_url = 'http://translate.google.com/translate_tts?tl='+lang_code+'&q='+string
+    hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"}
+    req = urllib2.Request(googl_speech_url, headers=hrs)
+    p = urllib2.urlopen(req)
+    ## Get the date and play it 
+
+
+
+def stt_google(filename):
     #Convert to flac
     print "Converting WAV to FLAC"
     os.system(FLAC_CONV+ filename+'.wav')
