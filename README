@@ -1,0 +1,7 @@
+##
+## Voice Exec
+##
+
+This little tool was born from the idea of VoiceCommand in OSX, the VoiceCommand in OSX is a little buggy so I thought perhaps to write a generic tool in Python that would be multi-platform: OSX, Linux & Possibly Windows.
+
+This is a work in progress
