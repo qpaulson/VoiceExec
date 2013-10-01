@@ -20,18 +20,31 @@ SILENCE_LIMIT = 3 #Silence limit in seconds. The max ammount of seconds where on
 
 
 p = pyaudio.PyAudio()
-
-
-
+configuration = ConfigParser.RawConfigParser()
 
 def loadConfig():
     print "Loading Configuration File"
 
-    config = ConfigParser.ConfigParser()
-    config.read( ['voiceExec.conf', os.path.expanduser('~/.voiceExec.conf')] )
-    print config.items( "System Commands" )
+    #config = ConfigParser.ConfigParser()
+    configuration.read( ['voiceExec.conf', os.path.expanduser('~/.voiceExec.conf')] )
+    print configuration.items( "System Commands" )
     print "Configuration File Loaded"
-    return config
+    #configuration = config
+
+
+def runCommand(cmd):
+        p = Popen(cmd, shell=True, stdout=PIPE)
+        textString = p.communicate()[0].rstrip()
+	return textString
+
+
+def matchConfig(string):
+	try:
+		cmd = configuration.get( "System Commands", string)
+		if ( cmd is not None ):
+			runCommand(cmd)
+	except:
+		print "Command not found configured: " + string
 
 
 def initStream():
@@ -139,15 +152,20 @@ def stt_google_wav(filename):
     res = p.read()
     textString = ''
     if (res != None):
-        cmd = "echo \"" + str(res) + "\" | sed -e 's/[{}]/''/g'| awk -v k=\"text\" '{n=split($0,a,\",\"); for (i=1; i<=n; i++) print a[i]; exit }' | awk -F: 'NR==3 { print $3; exit }'"
-        p = Popen(cmd, shell=True, stdout=PIPE)
-        textString = p.communicate()[0].rstrip()
+        #cmd = "echo \"" + str(res) + "\" | sed -e 's/[{}]/''/g'| awk -v k=\"text\" '{n=split($0,a,\",\"); for (i=1; i<=n; i++) print a[i]; exit }' | awk -F: 'NR==3 { print $3; exit }'"
+        #p = Popen(cmd, shell=True, stdout=PIPE)
+        #textString = p.communicate()[0].rstrip()
+	textString = runCommand( "echo \"" + str(res) + "\" | sed -e 's/[{}]/''/g'| awk -v k=\"text\" '{n=split($0,a,\",\"); for (i=1; i<=n; i++) print a[i]; exit }' | awk -F: 'NR==3 { print $3; exit }'" )
 
     print "Google returned: '" + textString + "'"
     if ( textString != '' ):
-        os.system( "say " + str(textString) )
+        #os.system( "say " + str(textString) )
+	print "Initiating Configuration Lookup"
+	matchConfig( textString )
+         
     else:
-        os.system( "say \"Sorry, I could not understand what you said\"" )
+        #os.system( "say \"Sorry, I could not understand what you said\"" )
+	print "String not found"
 
     print "Deleting Temp AudioFiles" 
     map(os.remove, (filename+'.flac', filename+'.wav'))
