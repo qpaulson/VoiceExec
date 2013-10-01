@@ -2,6 +2,7 @@ import pyaudio
 import wave
 import audioop
 import os
+import re
 import urllib2
 import time
 import ConfigParser
@@ -46,11 +47,17 @@ def matchConfig(string):
 		for key,value in keys:
 			print key + " : " + value
 			#do regex here
+			p = re.compile( key, re.IGNORECASE )
+			print "checking: "+ key
+			if p.search( string ):
+	 			print "Matched"
+				cmd = value
 
-		cmd = configuration.get( "System Commands", string)
+		#cmd = configuration.get( "System Commands", string)
 		if ( cmd is not None ):
 			runCommand(cmd)
-	except:
+	except Exception as e:
+		print e
 		print "Command not found configured: " + string
 
 
