@@ -4,6 +4,7 @@ import audioop
 import os
 import urllib2
 import time
+import ConfigParser
 from collections import deque 
 from subprocess import *
  
@@ -19,6 +20,15 @@ SILENCE_LIMIT = 3 #Silence limit in seconds. The max ammount of seconds where on
 
 
 p = pyaudio.PyAudio()
+
+
+
+
+def loadConfig():
+    config = ConfigParser.ConfigParser()
+    config.read( ['voiceExec.conf', os.path.expanduser('~/.voiceExec.conf')] )
+    return config
+
 
 def initStream():
     #open stream
@@ -141,4 +151,5 @@ def stt_google_wav(filename):
 
 FLAC_CONV = 'flac --sample-rate=16000 -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
+    loadConfig()
     listen_for_speech()
