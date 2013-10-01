@@ -25,8 +25,12 @@ p = pyaudio.PyAudio()
 
 
 def loadConfig():
+    print "Loading Configuration File"
+
     config = ConfigParser.ConfigParser()
     config.read( ['voiceExec.conf', os.path.expanduser('~/.voiceExec.conf')] )
+    print config.items( "System Commands" )
+    print "Configuration File Loaded"
     return config
 
 
