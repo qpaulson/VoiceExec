@@ -40,7 +40,13 @@ def runCommand(cmd):
 
 
 def matchConfig(string):
+    	keys = configuration.items( "System Commands" )
+
 	try:
+		for key,value in keys:
+			print key + " : " + value
+			#do regex here
+
 		cmd = configuration.get( "System Commands", string)
 		if ( cmd is not None ):
 			runCommand(cmd)
@@ -131,6 +137,18 @@ def save_speech(data, p):
     return filename
 
 
+## This may be easier since it returns WAV data
+def tts_speechUtil( string ):
+   #http://speechutil.com/convert/wav?text='Hello Dolly!!!'
+    lang_code='en'
+    googl_speech_url = 'http://speechutil.com/convert/wav?text='+string
+    hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"}
+    req = urllib2.Request(googl_speech_url, headers=hrs)
+    p = urllib2.urlopen(req)
+    wavStream = p.read()
+
+
+
 
 def tts_google( string ):
 	#this will get the last remnants
@@ -141,6 +159,7 @@ def tts_google( string ):
     hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"}
     req = urllib2.Request(googl_speech_url, headers=hrs)
     p = urllib2.urlopen(req)
+    
     ## Get the date and play it 
 
 
@@ -185,6 +204,7 @@ def stt_google(filename):
     print "Deleting Temp AudioFiles" 
     map(os.remove, (filename+'.flac', filename+'.wav'))
     return res
+
 
 FLAC_CONV = 'flac --sample-rate=16000 -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
