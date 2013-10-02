@@ -178,12 +178,17 @@ def stt_google(filename):
     print "Complete"
     #res = eval(p.read())['hypotheses']
     res = p.read()
+    print res
+    #print eval( str( eval(res)['hypotheses'] ))['utterance'][0]
     textString = ''
     if (res != None):
         #cmd = "echo \"" + str(res) + "\" | sed -e 's/[{}]/''/g'| awk -v k=\"text\" '{n=split($0,a,\",\"); for (i=1; i<=n; i++) print a[i]; exit }' | awk -F: 'NR==3 { print $3; exit }'"
         #p = Popen(cmd, shell=True, stdout=PIPE)
         #textString = p.communicate()[0].rstrip()
-	textString = runCommand( "echo \"" + str(res) + "\" | sed -e 's/[{}]/''/g'| awk -v k=\"text\" '{n=split($0,a,\",\"); for (i=1; i<=n; i++) print a[i]; exit }' | awk -F: 'NR==3 { print $3; exit }'" )
+	#textString = runCommand( "echo \"" + str(res) + "\" | sed -e 's/[{}]/''/g'| awk -v k=\"text\" '{n=split($0,a,\",\"); for (i=1; i<=n; i++) print a[i]; exit }' | awk -F: 'NR==3 { print $3; exit }'" )
+	p = re.compile('utterance\":\"([^\"]*)\"') 
+	testlist=p.findall( res,1)
+	textString = testlist[0]
 
     print "------------------------- RESULTS ----------------------------------"
     print "Google returned: '" + textString + "'"
