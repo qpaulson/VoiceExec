@@ -244,7 +244,7 @@ def stt_google(filename):
     print "Complete"
 
     #post it
-    print "Posting FLAC to Google"
+    print "------------------------ Posting FLAC to Google --------------------"
     lang_code='en-US'
     googl_speech_url = 'https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&pfilter=2&lang=%s&maxresults=6'%(lang_code)
     hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate='+str(vConfig.RATE)}
@@ -261,7 +261,9 @@ def stt_google(filename):
         #textString = p.communicate()[0].rstrip()
 	textString = runCommand( "echo \"" + str(res) + "\" | sed -e 's/[{}]/''/g'| awk -v k=\"text\" '{n=split($0,a,\",\"); for (i=1; i<=n; i++) print a[i]; exit }' | awk -F: 'NR==3 { print $3; exit }'" )
 
+    print "------------------------- RESULTS ----------------------------------"
     print "Google returned: '" + textString + "'"
+    print "--------------------------------------------------------------------"
     if ( textString != '' ):
         #os.system( "say " + str(textString) )
 	print "Initiating Configuration Lookup"
