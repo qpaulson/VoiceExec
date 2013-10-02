@@ -6,6 +6,8 @@ import re
 import urllib2
 import time
 import ConfigParser
+import pprint
+
 from collections import deque 
 from subprocess import *
  
@@ -13,44 +15,63 @@ from subprocess import *
 
 class VoiceConfig:
     def __init__(self):
+	INPUT_BLOCK_TIME = 0.05
+
         self.configuration = ConfigParser.RawConfigParser()
 	self.RATE = 44100
 	self.CHANNELS = 1
-	self.INPUT_BLOCK_TIME = 0.05
-	self.INPUT_FRAMES_PER_BLOCK = int(self.RATE*self.INPUT_BLOCK_TIME)
-	self.FORMAT = pyaudio.paInt16
+	self.DEVICE = -1
+
 	self.THRESHOLD = 10 #The threshold intensity that defines silence signal (lower than).
 	self.SILENCE_LIMIT = 3 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
-	self.DEVICE = None
-	
-	self.loadConfig
 
-    def loadConfig():
-        print "Loading Configuration File"
+	self.INPUT_FRAMES_PER_BLOCK = int(self.RATE*INPUT_BLOCK_TIME)
+	self.FORMAT = pyaudio.paInt16
+	
+	self.loadConfig()
+
+    def loadConfig(self):
+        print "CONFIG: Loading Configuration File"
 
         #config = ConfigParser.ConfigParser()
         self.configuration.read( ['voiceExec.conf', os.path.expanduser('~/.voiceExec.conf')] )
         print self.configuration.items( "System Commands" )
-        print "Configuration File Loaded"
+        print "CONFIG: Configuration File Loaded"
         #configuration = config
     
-        #if ( configuration.has_option( "System Config", config_key )):
-    	#    value = configuration.get( "System Config", config_key )
-	#    print "CONFIG: " + config_key + " in configuration, setting rate to: " + str(value)
-        #else:
-	#    print "CONFIG: " + config_key + " not configured, using default"
+	key = "record_rate"
+        if ( self.configuration.has_option( "System Config", key )):
+    	    self.RATE = int( self.configuration.get( "System Config", key ))
+	    print "CONFIG: " + key + " in configuration, setting to: " + str(self.RATE)
+        else:
+	    print "CONFIG: " + key + " not found, using default: " + str(self.RATE)
 
-    def getConfig(string):
+	key = "record_device"
+        if ( self.configuration.has_option( "System Config", key )):
+    	    self.DEVICE = int( self.configuration.get( "System Config", key ))
+	    print "CONFIG: " + key + " in configuration, setting to: " + str(self.DEVICE)
+        else:
+	    print "CONFIG: " + key + " not found, using default: AUTO DETECT"
+
+	key = "record_silence_threshold"
+        if ( self.configuration.has_option( "System Config", key )):
+    	    self.THRESHOLD = int( self.configuration.get( "System Config", key ))
+	    print "CONFIG: " + key + " in configuration, setting to: " + str(self.THRESHOLD)
+        else:
+	    print "CONFIG: " + key + " not found, using default: " + str(self.THRESHOLD)
+
+
+
+    def getConfig(self, string):
     	    keys = self.configuration.items( "System Commands" )
     
 	    try:
 		    for key,value in keys:
-			    print key + " : " + value
 			    #do regex here
 			    p = re.compile( key, re.IGNORECASE )
-			    print "checking: "+ key
+			    print "CONFIG checking: "+ key
 			    if p.search( string ):
-	 			    print "Matched"
+	 			    print "CONFIG: Matched"
 				    cmd = value
     
 		    #cmd = configuration.get( "System Commands", string)
@@ -78,21 +99,49 @@ def initStream():
     #open stream
 
     # List and find the correct input device
+    print "========================== DETECTING AVAILABLE AUDIO DEVICES ========================="
     device_index = None
-    for i in range( p.get_device_count() ):
-        devinfo = p.get_device_info_by_index(i)
-        print( "Device %d: %s"%(i,devinfo["name"]) )
-        for keyword in ["mic","input"]:
-	    if keyword in devinfo["name"].lower():
-	        print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
-	        device_index = i
+    device_max_rate = vConfig.RATE
+    device_max_channels = vConfig.CHANNELS
 
-    stream  = p.open(   format = configuration.FORMAT,
-                         channels = configuration.CHANNELS,
-                         rate = configuration.RATE,
+    for i in range( p.get_device_count() ):
+       devinfo = p.get_device_info_by_index(i)
+       print( "Device %d: %s"%(i,devinfo["name"]) )
+       for keyword in ["mic","input","camera"]:
+            if keyword in devinfo["name"].lower():
+	        print( "        * Input Device" )
+	        device_index = i
+                device_max_rate = int(devinfo["defaultSampleRate"])
+                device_max_channels = int(devinfo["maxInputChannels"])
+
+    print "======================================================================================"
+    if ( vConfig.DEVICE == -1 ):
+        print "Using Detected Input Device: " + str(device_index)
+    else:
+	device_index = int(vConfig.DEVICE)
+	print "Using Configured Input Device: " + str(device_index)
+
+    if ( device_max_rate < vConfig.RATE ):
+        print "Setting Record Rate to Device max of: " + str(device_max_rate)
+	vConfig.RATE = device_max_rate
+
+    if ( device_max_channels < vConfig.CHANNELS ):
+        print "Setting Record Channels to Device max of: " + str(device_max_channels)
+	vConfig.CHANNELS = device_max_channels
+
+    print "================================ DEVICE DETAILS ======================================"
+    devinfo = p.get_device_info_by_index(device_index)
+    pp = pprint.PrettyPrinter(indent=4)    
+    pp.pprint( devinfo )
+    print "======================================================================================"
+   
+	
+    stream  = p.open(   format = vConfig.FORMAT,
+                         channels = vConfig.CHANNELS,
+                         rate = vConfig.RATE,
                          input = True,
                          input_device_index = device_index,
-                         frames_per_buffer = configuration.INPUT_FRAMES_PER_BLOCK)
+                         frames_per_buffer = vConfig.INPUT_FRAMES_PER_BLOCK)
     print stream
     return stream
 
@@ -111,15 +160,15 @@ def listen_for_speech():
     all_m = []
     data = ''
     #SILENCE_LIMIT = 2
-    rel = configuration.RATE/configuration.INPUT_FRAMES_PER_BLOCK
-    slid_win = deque(maxlen=configuration.SILENCE_LIMIT*rel)
+    rel = vConfig.RATE/vConfig.INPUT_FRAMES_PER_BLOCK
+    slid_win = deque(maxlen=vConfig.SILENCE_LIMIT*rel)
     started = False
     
     while (True):
-        data = stream.read(configuration.INPUT_FRAMES_PER_BLOCK)
+        data = stream.read(vConfig.INPUT_FRAMES_PER_BLOCK)
         slid_win.append (abs(audioop.avg(data, 2)))
 
-        if(True in [ x>configuration.THRESHOLD for x in slid_win]):
+        if(True in [ x>vConfig.THRESHOLD for x in slid_win]):
             if(not started):
                 print "starting record"
             started = True
@@ -132,7 +181,7 @@ def listen_for_speech():
             stt_google(filename)
             #reset all
             started = False
-            slid_win = deque(maxlen=configuration.SILENCE_LIMIT*rel)
+            slid_win = deque(maxlen=vConfig.SILENCE_LIMIT*rel)
             all_m= []
 	    stream = initStream()
             print stream
@@ -148,8 +197,8 @@ def save_speech(data, p):
     # write data to WAVE file
     data = ''.join(data)
     wf = wave.open(filename+'.wav', 'wb')
-    wf.setnchannels(configuration.CHANNELS)
-    wf.setsampwidth(p.get_sample_size(configuration.FORMAT))
+    wf.setnchannels(vConfig.CHANNELS)
+    wf.setsampwidth(p.get_sample_size(vConfig.FORMAT))
     #wf.setframerate(RATE)
     wf.setframerate(16000)
     wf.writeframes(data)
@@ -197,7 +246,7 @@ def stt_google(filename):
     print "Posting FLAC to Google"
     lang_code='en-US'
     googl_speech_url = 'https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&pfilter=2&lang=%s&maxresults=6'%(lang_code)
-    hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate='+str(configuration.RATE)}
+    hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate='+str(vConfig.RATE)}
     req = urllib2.Request(googl_speech_url, data=flac_cont, headers=hrs)
     p = urllib2.urlopen(req)
  
@@ -215,7 +264,7 @@ def stt_google(filename):
     if ( textString != '' ):
         #os.system( "say " + str(textString) )
 	print "Initiating Configuration Lookup"
-	cmd = configuration.getConfig( textString )
+	cmd = vConfig.getConfig( textString )
         if ( cmd is not None ):
             runCommand(cmd)
          
@@ -231,6 +280,6 @@ def stt_google(filename):
 FLAC_CONV = 'flac --sample-rate=16000 -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
 
-    configuration = VoiceConfig()
+    vConfig = VoiceConfig()
 
     listen_for_speech()
