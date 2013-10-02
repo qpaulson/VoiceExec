@@ -1,85 +1,27 @@
+#!/usr/bin/python
+
 import atexit
 import pyaudio
 import wave
 import audioop
-import os
 import re
 import urllib2
 import time
 import ConfigParser
 import pprint
+import sys, os, inspect
+
 
 from collections import deque 
 from subprocess import *
- 
 
 
-class VoiceConfig:
-    def __init__(self):
-	INPUT_BLOCK_TIME = 0.05
+cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"src")))
+if cmd_subfolder not in sys.path:
+    sys.path.insert(0, cmd_subfolder)
 
-        self.configuration = ConfigParser.RawConfigParser()
-	self.RATE = 44100
-	self.CHANNELS = 2
-	self.DEVICE = -1
-
-	self.THRESHOLD = 10 #The threshold intensity that defines silence signal (lower than).
-	self.SILENCE_LIMIT = 3 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
-
-	self.INPUT_FRAMES_PER_BLOCK = int(self.RATE*INPUT_BLOCK_TIME)
-	self.FORMAT = pyaudio.paInt16
-	
-	self.loadConfig()
-
-    def loadConfig(self):
-        print "CONFIG: Loading Configuration File"
-
-        #config = ConfigParser.ConfigParser()
-        self.configuration.read( ['voiceExec.conf', os.path.expanduser('~/.voiceExec.conf')] )
-        print self.configuration.items( "System Commands" )
-        print "CONFIG: Configuration File Loaded"
-        #configuration = config
-    
-	key = "record_rate"
-        if ( self.configuration.has_option( "System Config", key )):
-    	    self.RATE = int( self.configuration.get( "System Config", key ))
-	    print "CONFIG: " + key + " in configuration, setting to: " + str(self.RATE)
-        else:
-	    print "CONFIG: " + key + " not found, using default: " + str(self.RATE)
-
-	key = "record_device"
-        if ( self.configuration.has_option( "System Config", key )):
-    	    self.DEVICE = int( self.configuration.get( "System Config", key ))
-	    print "CONFIG: " + key + " in configuration, setting to: " + str(self.DEVICE)
-        else:
-	    print "CONFIG: " + key + " not found, using default: AUTO DETECT"
-
-	key = "record_silence_threshold"
-        if ( self.configuration.has_option( "System Config", key )):
-    	    self.THRESHOLD = int( self.configuration.get( "System Config", key ))
-	    print "CONFIG: " + key + " in configuration, setting to: " + str(self.THRESHOLD)
-        else:
-	    print "CONFIG: " + key + " not found, using default: " + str(self.THRESHOLD)
-
-
-
-    def getConfig(self, string):
-    	    keys = self.configuration.items( "System Commands" )
-    
-	    try:
-		    for key,value in keys:
-			    #do regex here
-			    p = re.compile( key, re.IGNORECASE )
-			    print "CONFIG checking: "+ key
-			    if p.search( string ):
-	 			    print "CONFIG: Matched"
-				    cmd = value
-    
-		    #cmd = configuration.get( "System Commands", string)
-		    return cmd 
-	    except Exception as e:
-		    print e
-		    print "Command not found configured: " + string
+#sys.path.append( os.getcwd() + "src" )
+import voiceconfig
 
 
 
@@ -89,8 +31,6 @@ def runCommand(cmd):
         p = Popen(cmd, shell=True, stdout=PIPE)
         textString = p.communicate()[0].rstrip()
 	return textString
-
-
 
 
 def initStream():
@@ -133,7 +73,7 @@ def initStream():
     print "======================================================================================"
    
 	
-    stream  = p.open(   format = vConfig.FORMAT,
+    stream  = p.open(   format = pyaudio.paInt16,
                          channels = vConfig.CHANNELS,
                          rate = vConfig.RATE,
                          input = True,
@@ -195,7 +135,7 @@ def save_speech(data, p):
     data = ''.join(data)
     wf = wave.open(filename+'.wav', 'wb')
     wf.setnchannels(vConfig.CHANNELS)
-    wf.setsampwidth(p.get_sample_size(vConfig.FORMAT))
+    wf.setsampwidth(p.get_sample_size( pyaudio.paInt16 ))
     #wf.setframerate(RATE)
     wf.setframerate(16000)
     wf.writeframes(data)
@@ -265,8 +205,6 @@ def stt_google(filename):
 
 
 
-
-
 def cleanup():
     print "Caught Exit.. Cleaning Up" 
     print "... Deleting any tmp audio files lying around"
@@ -274,9 +212,9 @@ def cleanup():
 
 FLAC_CONV = 'flac --sample-rate=16000 -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
-    atexit.register(cleanup)
+    #atexit.register(cleanup)
 
-    vConfig = VoiceConfig()
+    vConfig = voiceconfig.VoiceConfig()
     listen_for_speech()
 
 
