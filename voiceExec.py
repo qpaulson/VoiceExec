@@ -1,3 +1,4 @@
+import atexit
 import pyaudio
 import wave
 import audioop
@@ -277,9 +278,19 @@ def stt_google(filename):
     return res
 
 
+
+
+
+def cleanup():
+    print "Caught Exit.. Cleaning Up" 
+    print "... Deleting any tmp audio files lying around"
+    os.remove( "output_*" )
+
 FLAC_CONV = 'flac --sample-rate=16000 -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
+    atexit.register(cleanup)
 
     vConfig = VoiceConfig()
-
     listen_for_speech()
+
+
