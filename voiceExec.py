@@ -10,28 +10,60 @@ from collections import deque
 from subprocess import *
  
 
-#confi
-RATE = 44100
-CHANNELS = 1
-INPUT_BLOCK_TIME = 0.05
-INPUT_FRAMES_PER_BLOCK = int(RATE*INPUT_BLOCK_TIME)
-FORMAT = pyaudio.paInt16
-THRESHOLD = 10 #The threshold intensity that defines silence signal (lower than).
-SILENCE_LIMIT = 3 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
+
+class VoiceConfig:
+    def __init__(self):
+        self.configuration = ConfigParser.RawConfigParser()
+	self.RATE = 44100
+	self.CHANNELS = 1
+	self.INPUT_BLOCK_TIME = 0.05
+	self.INPUT_FRAMES_PER_BLOCK = int(self.RATE*self.INPUT_BLOCK_TIME)
+	self.FORMAT = pyaudio.paInt16
+	self.THRESHOLD = 10 #The threshold intensity that defines silence signal (lower than).
+	self.SILENCE_LIMIT = 3 #Silence limit in seconds. The max ammount of seconds where only silence is recorded. When this time passes the recording finishes and the file is delivered.
+	self.DEVICE = None
+	
+	self.loadConfig
+
+    def loadConfig():
+        print "Loading Configuration File"
+
+        #config = ConfigParser.ConfigParser()
+        self.configuration.read( ['voiceExec.conf', os.path.expanduser('~/.voiceExec.conf')] )
+        print self.configuration.items( "System Commands" )
+        print "Configuration File Loaded"
+        #configuration = config
+    
+        #if ( configuration.has_option( "System Config", config_key )):
+    	#    value = configuration.get( "System Config", config_key )
+	#    print "CONFIG: " + config_key + " in configuration, setting rate to: " + str(value)
+        #else:
+	#    print "CONFIG: " + config_key + " not configured, using default"
+
+    def getConfig(string):
+    	    keys = self.configuration.items( "System Commands" )
+    
+	    try:
+		    for key,value in keys:
+			    print key + " : " + value
+			    #do regex here
+			    p = re.compile( key, re.IGNORECASE )
+			    print "checking: "+ key
+			    if p.search( string ):
+	 			    print "Matched"
+				    cmd = value
+    
+		    #cmd = configuration.get( "System Commands", string)
+		    return cmd 
+	    except Exception as e:
+		    print e
+		    print "Command not found configured: " + string
+
 
 
 p = pyaudio.PyAudio()
-configuration = ConfigParser.RawConfigParser()
 
 
-def loadConfig():
-    print "Loading Configuration File"
-
-    #config = ConfigParser.ConfigParser()
-    configuration.read( ['voiceExec.conf', os.path.expanduser('~/.voiceExec.conf')] )
-    print configuration.items( "System Commands" )
-    print "Configuration File Loaded"
-    #configuration = config
 
 
 def runCommand(cmd):
@@ -40,25 +72,6 @@ def runCommand(cmd):
 	return textString
 
 
-def matchConfig(string):
-    	keys = configuration.items( "System Commands" )
-
-	try:
-		for key,value in keys:
-			print key + " : " + value
-			#do regex here
-			p = re.compile( key, re.IGNORECASE )
-			print "checking: "+ key
-			if p.search( string ):
-	 			print "Matched"
-				cmd = value
-
-		#cmd = configuration.get( "System Commands", string)
-		if ( cmd is not None ):
-			runCommand(cmd)
-	except Exception as e:
-		print e
-		print "Command not found configured: " + string
 
 
 def initStream():
@@ -74,12 +87,12 @@ def initStream():
 	        print( "Found an input: device %d - %s"%(i,devinfo["name"]) )
 	        device_index = i
 
-    stream  = p.open(   format = FORMAT,
-                         channels = CHANNELS,
-                         rate = RATE,
+    stream  = p.open(   format = configuration.FORMAT,
+                         channels = configuration.CHANNELS,
+                         rate = configuration.RATE,
                          input = True,
                          input_device_index = device_index,
-                         frames_per_buffer = INPUT_FRAMES_PER_BLOCK)
+                         frames_per_buffer = configuration.INPUT_FRAMES_PER_BLOCK)
     print stream
     return stream
 
@@ -98,15 +111,15 @@ def listen_for_speech():
     all_m = []
     data = ''
     #SILENCE_LIMIT = 2
-    rel = RATE/INPUT_FRAMES_PER_BLOCK
-    slid_win = deque(maxlen=SILENCE_LIMIT*rel)
+    rel = configuration.RATE/configuration.INPUT_FRAMES_PER_BLOCK
+    slid_win = deque(maxlen=configuration.SILENCE_LIMIT*rel)
     started = False
     
     while (True):
-        data = stream.read(INPUT_FRAMES_PER_BLOCK)
+        data = stream.read(configuration.INPUT_FRAMES_PER_BLOCK)
         slid_win.append (abs(audioop.avg(data, 2)))
 
-        if(True in [ x>THRESHOLD for x in slid_win]):
+        if(True in [ x>configuration.THRESHOLD for x in slid_win]):
             if(not started):
                 print "starting record"
             started = True
@@ -119,7 +132,7 @@ def listen_for_speech():
             stt_google(filename)
             #reset all
             started = False
-            slid_win = deque(maxlen=SILENCE_LIMIT*rel)
+            slid_win = deque(maxlen=configuration.SILENCE_LIMIT*rel)
             all_m= []
 	    stream = initStream()
             print stream
@@ -135,8 +148,8 @@ def save_speech(data, p):
     # write data to WAVE file
     data = ''.join(data)
     wf = wave.open(filename+'.wav', 'wb')
-    wf.setnchannels(CHANNELS)
-    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setnchannels(configuration.CHANNELS)
+    wf.setsampwidth(p.get_sample_size(configuration.FORMAT))
     #wf.setframerate(RATE)
     wf.setframerate(16000)
     wf.writeframes(data)
@@ -184,7 +197,7 @@ def stt_google(filename):
     print "Posting FLAC to Google"
     lang_code='en-US'
     googl_speech_url = 'https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&pfilter=2&lang=%s&maxresults=6'%(lang_code)
-    hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate='+str(RATE)}
+    hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7",'Content-type': 'audio/x-flac; rate='+str(configuration.RATE)}
     req = urllib2.Request(googl_speech_url, data=flac_cont, headers=hrs)
     p = urllib2.urlopen(req)
  
@@ -202,7 +215,9 @@ def stt_google(filename):
     if ( textString != '' ):
         #os.system( "say " + str(textString) )
 	print "Initiating Configuration Lookup"
-	matchConfig( textString )
+	cmd = configuration.getConfig( textString )
+        if ( cmd is not None ):
+            runCommand(cmd)
          
     else:
         #os.system( "say \"Sorry, I could not understand what you said\"" )
@@ -215,5 +230,7 @@ def stt_google(filename):
 
 FLAC_CONV = 'flac --sample-rate=16000 -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
-    loadConfig()
+
+    configuration = VoiceConfig()
+
     listen_for_speech()
