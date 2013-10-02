@@ -20,7 +20,7 @@ class VoiceConfig:
 
         self.configuration = ConfigParser.RawConfigParser()
 	self.RATE = 44100
-	self.CHANNELS = 1
+	self.CHANNELS = 2
 	self.DEVICE = -1
 
 	self.THRESHOLD = 10 #The threshold intensity that defines silence signal (lower than).
@@ -85,9 +85,6 @@ class VoiceConfig:
 
 p = pyaudio.PyAudio()
 
-
-
-
 def runCommand(cmd):
         p = Popen(cmd, shell=True, stdout=PIPE)
         textString = p.communicate()[0].rstrip()
@@ -108,12 +105,11 @@ def initStream():
     for i in range( p.get_device_count() ):
        devinfo = p.get_device_info_by_index(i)
        print( "Device %d: %s"%(i,devinfo["name"]) )
-       for keyword in ["mic","input","camera"]:
-            if keyword in devinfo["name"].lower():
-	        print( "        * Input Device" )
-	        device_index = i
-                device_max_rate = int(devinfo["defaultSampleRate"])
-                device_max_channels = int(devinfo["maxInputChannels"])
+       if ( int( devinfo["maxInputChannels"] ) > 0 ):
+	    print( "        * Input Device" )
+	    device_index = i
+            device_max_rate = int(devinfo["defaultSampleRate"])
+            device_max_channels = int(devinfo["maxInputChannels"])
 
     print "======================================================================================"
     if ( vConfig.DEVICE == -1 ):
@@ -205,18 +201,6 @@ def save_speech(data, p):
     wf.writeframes(data)
     wf.close()
     return filename
-
-
-## This may be easier since it returns WAV data
-def tts_speechUtil( string ):
-   #http://speechutil.com/convert/wav?text='Hello Dolly!!!'
-    lang_code='en'
-    googl_speech_url = 'http://speechutil.com/convert/wav?text='+string
-    hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"}
-    req = urllib2.Request(googl_speech_url, headers=hrs)
-    p = urllib2.urlopen(req)
-    wavStream = p.read()
-
 
 
 

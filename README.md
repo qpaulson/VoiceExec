@@ -9,4 +9,15 @@ VoiceCOmmand is a reat tool, however there were a couple issues with VoiceComman
 This is in its early stages, so check back later on or feel free to jump in and lend a hand in writing a great Voice Exec front end for Home/PC Automation.
 
 
+Package Requirements
+====================
+
+You will need to install the following Python Libraries
+ - pyaudio ( Device Control & Recording )
+	https://pypi.python.org/pypi/PyAudio
+
+ - pyglet  ( Play Back )
+	http://www.pyglet.org/download.html
+
+
 Thank you.
