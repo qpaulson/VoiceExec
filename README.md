@@ -19,5 +19,8 @@ You will need to install the following Python Libraries
  - pyglet  ( Play Back )
 	http://www.pyglet.org/download.html
 
+ - flactools
+	
+
 
 Thank you.
