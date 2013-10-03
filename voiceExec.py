@@ -22,7 +22,7 @@ if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
 import pywapi
-import forecastio
+#import forecastio
 from googleSpeech import GoogleSpeech
 from voiceConfig import VoiceConfig
 
