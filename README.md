@@ -16,8 +16,12 @@ You will need to install the following Python Libraries
  - pyaudio ( Device Control & Recording )
 	https://pypi.python.org/pypi/PyAudio
 
- - pyglet  ( Play Back )
-	http://www.pyglet.org/download.html
+ - gstreamer ( Play Back )
+	http://gstreamer.freedesktop.org/
+	Available on OSX via Brew
+
+ - pygobject
+	Available on OSX via Brew
 
  - flactools
 	
