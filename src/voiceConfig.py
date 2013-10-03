@@ -94,4 +94,6 @@ class VoiceConfig:
                 print cmd
                 os.system(cmd)
 
+    def get(self, section, key ):
+	return self.configuration.get( section, key )
 

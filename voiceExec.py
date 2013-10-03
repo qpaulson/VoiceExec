@@ -21,6 +21,8 @@ cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(insp
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
+import pywapi
+import forecastio
 from googleSpeech import GoogleSpeech
 from voiceConfig import VoiceConfig
 
@@ -149,11 +151,28 @@ def cleanup():
     print "... Deleting any tmp audio files lying around"
     os.system( "rm output_*" )
 
+def speakWeather():
+	weather_com_result = pywapi.get_weather_from_weather_com('CAXX0518')
+	GoogleSpeech.tts( "It is currently " + str(weather_com_result['current_conditions']['text']) + " and " + weather_com_result['current_conditions']['temperature'] + "degrees.\n\n" )
+
+
+	## Attempting to get forecast.io working.. but missing JSON libs.. 
+	#api_key = vConfig.get("weather", "key" )
+	#lat = 49.2500
+	#lng = 123.1000
+
+	#forecast = forecastio.load_forecast(api_key, lat, lng)
+	#print forecast
+	
+
 if(__name__ == '__main__'):
     atexit.register(cleanup)
 
-    GoogleSpeech.tts("Hello, Welcome to Voice Exec!")
+
+    #GoogleSpeech.tts("Hello, Welcome!")
     vConfig = VoiceConfig()
+    speakWeather()
     listen_for_speech()
+    
 
 
