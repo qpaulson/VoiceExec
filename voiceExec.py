@@ -147,10 +147,10 @@ def save_speech(data, p):
 def cleanup():
     print "Caught Exit.. Cleaning Up" 
     print "... Deleting any tmp audio files lying around"
-    os.remove( "output_*" )
+    os.system( "rm output_*" )
 
 if(__name__ == '__main__'):
-    #atexit.register(cleanup)
+    atexit.register(cleanup)
 
     GoogleSpeech.tts("Hello, Welcome to Voice Exec!")
     vConfig = VoiceConfig()
