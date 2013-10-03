@@ -21,7 +21,7 @@ if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
 #sys.path.append( os.getcwd() + "src" )
-import voiceconfig
+from voiceConfig import VoiceConfig
 
 
 
@@ -219,7 +219,7 @@ FLAC_CONV = 'flac --sample-rate=16000 -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
     #atexit.register(cleanup)
 
-    vConfig = voiceconfig.VoiceConfig()
+    vConfig = VoiceConfig()
     listen_for_speech()
 
 
