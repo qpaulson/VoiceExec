@@ -21,8 +21,7 @@ cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(insp
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
-#sys.path.append( os.getcwd() + "src" )
-from googleSpeech import googlespeech
+from googleSpeech import GoogleSpeech
 from voiceConfig import VoiceConfig
 
 
@@ -117,7 +116,7 @@ def listen_for_speech():
             #the limit was reached, finish capture and deliver
             filename = save_speech(all_m,p)
 	    print filename
-            stt_google(filename)
+            GoogleSpeech.stt(filename, vConfig.RATE)
             #reset all
             started = False
             slid_win = deque(maxlen=vConfig.SILENCE_LIMIT*rel)
@@ -150,10 +149,10 @@ def cleanup():
     print "... Deleting any tmp audio files lying around"
     os.remove( "output_*" )
 
-FLAC_CONV = 'flac --sample-rate=16000 -f ' # We need a WAV to FLAC converter.
 if(__name__ == '__main__'):
     #atexit.register(cleanup)
-    tts_google("hello world")
+
+    GoogleSpeech.tts("Hello, Welcome to Voice Exec!")
     vConfig = VoiceConfig()
     listen_for_speech()
 
