@@ -72,19 +72,19 @@ class GoogleSpeech:
 		print "------------------------- RESULTS ----------------------------------"
 		print "Google returned: '" + textString + "'"
 		print "--------------------------------------------------------------------"
-		if ( textString != '' ):
+		#if ( textString != '' ):
 			#os.system( "say " + str(textString) )
-			print "Initiating Configuration Lookup"
-			cmd = vConfig.getConfig( textString )
-			if ( cmd is not None ):
-				runCommand(cmd)
+			#print "Initiating Configuration Lookup"
+			#cmd = vConfig.getConfig( textString )
+			#if ( cmd is not None ):
+			#	runCommand(cmd)
 
-		else:
+		#else:
 			#os.system( "say \"Sorry, I could not understand what you said\"" )
-			print "String not found"
+		#	print "String not found"
 
 		print "Deleting Temp AudioFiles"
 		map(os.remove, (filename+'.flac', filename+'.wav'))
-		return res
+		return textString
 
 

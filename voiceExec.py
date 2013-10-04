@@ -31,8 +31,13 @@ from voiceConfig import VoiceConfig
 p = pyaudio.PyAudio()
 
 def runCommand(cmd):
-        p = Popen(cmd, shell=True, stdout=PIPE)
-        textString = p.communicate()[0].rstrip()
+        textString = ''
+	if ( cmd == "class:weather" ):
+            speakWeather()
+	else:	
+	    p = Popen(cmd, shell=True, stdout=PIPE)
+	    textString = p.communicate()[0].rstrip()
+
 	return textString
 
 
@@ -118,7 +123,19 @@ def listen_for_speech():
             #the limit was reached, finish capture and deliver
             filename = save_speech(all_m,p)
 	    print filename
-            GoogleSpeech.stt(filename, vConfig.RATE)
+
+            textString = GoogleSpeech.stt(filename, vConfig.RATE)
+	    if ( textString != '' ):
+		#os.system( "say " + str(textString) )
+		print "Initiating Configuration Lookup"
+		cmd = vConfig.getConfig( textString )
+		if ( cmd is not None ):
+		       runCommand(cmd)
+
+
+	    #if ( textString is not None ):
+            #    runCommand( textString )
+
             #reset all
             started = False
             slid_win = deque(maxlen=vConfig.SILENCE_LIMIT*rel)
@@ -171,7 +188,6 @@ if(__name__ == '__main__'):
 
     #GoogleSpeech.tts("Hello, Welcome!")
     vConfig = VoiceConfig()
-    speakWeather()
     listen_for_speech()
     
 
