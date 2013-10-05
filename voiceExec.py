@@ -21,10 +21,11 @@ cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(insp
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
-import pywapi
+#import pywapi
 #import forecastio
 from googleSpeech import GoogleSpeech
 from voiceConfig import VoiceConfig
+from voiceWeather import VoiceWeather
 
 
 
@@ -36,7 +37,7 @@ def runCommand( string ):
 
             textString = ''
 	    if ( cmd == "class:weather" ):
-                speakWeather( string )
+                VoiceWeather.speakWeather( vConfig, string )
 	    else:	
 	        p = Popen(cmd, shell=True, stdout=PIPE)
 	        textString = p.communicate()[0].rstrip()
@@ -168,66 +169,66 @@ def cleanup():
     print "... Deleting any tmp audio files lying around"
     os.system( "rm output_*" )
 
-def speakWeather( string ):
-        location_code = vConfig.get( "weather", "weather_location_code" )
-
-	weather_com_result = pywapi.get_weather_from_weather_com( str(location_code ))
-	print weather_com_result
-	print string
-
-
-	lookupString = ''
-	### TODAY
-	if ( re.compile( "today", re.IGNORECASE ).findall( string ,1 )):
-	    todayData = weather_com_result['forecasts'][0]
-	    if ( todayData['day']['text'] != 'N/A' ):
-		    if ( int( todayData['day']['chance_precip'] ) > 40 ):
-		        lookupString = "Today will be " + str( todayData['day']['text'] ) + " with a chance of showers and a high of " + str( todayData['high'] ) + "degrees"
-		    else:
-		        lookupString = "Today will be " + str( todayData['day']['text'] ) + " with a high of " + str( todayData['high'] ) + "degrees"
-            else:
-		    if ( int(todayData['night']['chance_precip'] ) > 40 ):
-		        lookupString = "Tonight will be " + str( todayData['night']['text'] ) + " with a chance of showers"
-		    else:
-		        lookupString = "Tonight will be " + str( todayData['night']['text'] )
-
-
+#def speakWeather( string ):
+        #location_code = vConfig.get( "weather", "weather_location_code" )
+#
+	#weather_com_result = pywapi.get_weather_from_weather_com( str(location_code ))
+	#print weather_com_result
+	#print string
+#
+#
+	#lookupString = ''
+	#### TODAY
+	#if ( re.compile( "today", re.IGNORECASE ).findall( string ,1 )):
+	    #todayData = weather_com_result['forecasts'][0]
+	    #if ( todayData['day']['text'] != 'N/A' ):
+		    #if ( int( todayData['day']['chance_precip'] ) > 40 ):
+		        #lookupString = "Today will be " + str( todayData['day']['text'] ) + " with a chance of showers and a high of " + str( todayData['high'] ) + "degrees"
+		    #else:
+		        #lookupString = "Today will be " + str( todayData['day']['text'] ) + " with a high of " + str( todayData['high'] ) + "degrees"
+            #else:
+		    #if ( int(todayData['night']['chance_precip'] ) > 40 ):
+		        #lookupString = "Tonight will be " + str( todayData['night']['text'] ) + " with a chance of showers"
+		    #else:
+		        #lookupString = "Tonight will be " + str( todayData['night']['text'] )
+#
+#
 	### TONIGHT
-	elif ( re.compile( "tonight", re.IGNORECASE).findall( string ,1 )):
-	    todayData = weather_com_result['forecasts'][0]
-	    if ( int(todayData['night']['chance_precip'] ) > 40 ):
-	        lookupString = "Tonight will be " + str( todayData['night']['text'] ) + " with a chance of showers"
-	    else:
-	        lookupString = "Tonight will be " + str( todayData['night']['text'] )
+	#elif ( re.compile( "tonight", re.IGNORECASE).findall( string ,1 )):
+	    #todayData = weather_com_result['forecasts'][0]
+	    #if ( int(todayData['night']['chance_precip'] ) > 40 ):
+	        #lookupString = "Tonight will be " + str( todayData['night']['text'] ) + " with a chance of showers"
+	    #else:
+	        #lookupString = "Tonight will be " + str( todayData['night']['text'] )
+#
+	#### Tomorrow Night
+	#elif ( re.compile( "tomorrow night", re.IGNORECASE).findall( string ,1 )):
+	    #todayData = weather_com_result['forecasts'][1]
+	    #if ( int(todayData['night']['chance_precip'] ) > 40 ):
+	        #lookupString = "Tomorrow night will be " + str( todayData['night']['text'] ) + " with a chance of showers"
+	    #else:
+	        #lookupString = "Tomorrow night will be " + str( todayData['night']['text'] )
 
-	### Tomorrow Night
-	elif ( re.compile( "tomorrow night", re.IGNORECASE).findall( string ,1 )):
-	    todayData = weather_com_result['forecasts'][1]
-	    if ( int(todayData['night']['chance_precip'] ) > 40 ):
-	        lookupString = "Tomorrow night will be " + str( todayData['night']['text'] ) + " with a chance of showers"
-	    else:
-	        lookupString = "Tomorrow night will be " + str( todayData['night']['text'] )
-
-	### TODAY
-	elif ( re.compile( "tomorrow", re.IGNORECASE ).findall( string ,1 )):
-	    todayData = weather_com_result['forecasts'][1]
-	    if ( todayData['day']['text'] != 'N/A' ):
-		    if (( int( todayData['day']['chance_precip'] ) > 40 ) or ( int( todayData['night']['chance_precip'] ) > 40 )):
-		        lookupString = "Tomorrow will be " + str( todayData['day']['text'] ) + " with a chance of showers and a high of " + str( todayData['high'] ) + " degrees"
-		    else:
-		        lookupString = "Tomorrow will be " + str( todayData['day']['text'] ) + " with a high of " + str( todayData['high'] ) + "degrees"
-
-
-	else:
-	    lookupString = "It is currently " + str(weather_com_result['current_conditions']['text']) + " and " + weather_com_result['current_conditions']['temperature'] + "degrees.\n\n" 
-
-
-	print lookupString
-	## Work our magic
-	if ( lookupString != '' ):
-	    GoogleSpeech.tts( lookupString )
-	else: 
-	    GoogleSpeech.tts( "Sorry, Weather information un-available at this time, please try again later" )
+	#### TODAY
+	#elif ( re.compile( "tomorrow", re.IGNORECASE ).findall( string ,1 )):
+	    #todayData = weather_com_result['forecasts'][1]
+	    #if ( todayData['day']['text'] != 'N/A' ):
+		    #if (( int( todayData['day']['chance_precip'] ) > 40 ) or ( int( todayData['night']['chance_precip'] ) > 40 )):
+		        #lookupString = "Tomorrow will be " + str( todayData['day']['text'] ) + " with a chance of showers and a high of " + str( todayData['high'] ) + " degrees"
+		    #else:
+		        #lookupString = "Tomorrow will be " + str( todayData['day']['text'] ) + " with a high of " + str( todayData['high'] ) + "degrees"
+#
+#
+	#else:
+	    #lookupString = "It is currently " + str(weather_com_result['current_conditions']['text']) + " and " + weather_com_result['current_conditions']['temperature'] + "degrees.\n\n" 
+#
+#
+	#print lookupString
+	### Work our magic
+	#if ( lookupString != '' ):
+	    #GoogleSpeech.tts( lookupString )
+	#else: 
+	    #GoogleSpeech.tts( "Sorry, Weather information un-available at this time, please try again later" )
         
 
 
