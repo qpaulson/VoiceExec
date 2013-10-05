@@ -33,7 +33,7 @@ class GoogleSpeech:
 		ofp.write(res.read())
 		ofp.close()
 
-		os.system( 'play '+filename+'.mp3' )
+		os.system( 'mplayer '+filename+'.mp3' )
 
 		## Get the date and play it 
 

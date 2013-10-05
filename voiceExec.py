@@ -7,7 +7,7 @@ import audioop
 import re
 import urllib
 import urllib2
-import time
+import time, datetime
 import ConfigParser
 import pprint
 import sys, os, inspect
@@ -30,13 +30,16 @@ from voiceConfig import VoiceConfig
 
 p = pyaudio.PyAudio()
 
-def runCommand(cmd):
-        textString = ''
-	if ( cmd == "class:weather" ):
-            speakWeather()
-	else:	
-	    p = Popen(cmd, shell=True, stdout=PIPE)
-	    textString = p.communicate()[0].rstrip()
+def runCommand( string ):
+	cmd = vConfig.getConfig( string )
+	if ( cmd is not None ):
+
+            textString = ''
+	    if ( cmd == "class:weather" ):
+                speakWeather( string )
+	    else:	
+	        p = Popen(cmd, shell=True, stdout=PIPE)
+	        textString = p.communicate()[0].rstrip()
 
 	return textString
 
@@ -128,13 +131,10 @@ def listen_for_speech():
 	    if ( textString != '' ):
 		#os.system( "say " + str(textString) )
 		print "Initiating Configuration Lookup"
-		cmd = vConfig.getConfig( textString )
-		if ( cmd is not None ):
-		       runCommand(cmd)
+		#cmd = vConfig.getConfig( textString )
+		#if ( cmd is not None ):
+		runCommand(textString)
 
-
-	    #if ( textString is not None ):
-            #    runCommand( textString )
 
             #reset all
             started = False
@@ -168,18 +168,69 @@ def cleanup():
     print "... Deleting any tmp audio files lying around"
     os.system( "rm output_*" )
 
-def speakWeather():
-	weather_com_result = pywapi.get_weather_from_weather_com('CAXX0518')
-	GoogleSpeech.tts( "It is currently " + str(weather_com_result['current_conditions']['text']) + " and " + weather_com_result['current_conditions']['temperature'] + "degrees.\n\n" )
+def speakWeather( string ):
+        location_code = vConfig.get( "weather", "weather_location_code" )
+
+	weather_com_result = pywapi.get_weather_from_weather_com( str(location_code ))
+	print weather_com_result
+	print string
 
 
-	## Attempting to get forecast.io working.. but missing JSON libs.. 
-	#api_key = vConfig.get("weather", "key" )
-	#lat = 49.2500
-	#lng = 123.1000
+	lookupString = ''
+	### TODAY
+	if ( re.compile( "today", re.IGNORECASE ).findall( string ,1 )):
+	    todayData = weather_com_result['forecasts'][0]
+	    if ( todayData['day']['text'] != 'N/A' ):
+		    if ( int( todayData['day']['chance_precip'] ) > 40 ):
+		        lookupString = "Today will be " + str( todayData['day']['text'] ) + " with a chance of showers and a high of " + str( todayData['high'] ) + "degrees"
+		    else:
+		        lookupString = "Today will be " + str( todayData['day']['text'] ) + " with a high of " + str( todayData['high'] ) + "degrees"
+            else:
+		    if ( int(todayData['night']['chance_precip'] ) > 40 ):
+		        lookupString = "Tonight will be " + str( todayData['night']['text'] ) + " with a chance of showers"
+		    else:
+		        lookupString = "Tonight will be " + str( todayData['night']['text'] )
 
-	#forecast = forecastio.load_forecast(api_key, lat, lng)
-	#print forecast
+
+	### TONIGHT
+	elif ( re.compile( "tonight", re.IGNORECASE).findall( string ,1 )):
+	    todayData = weather_com_result['forecasts'][0]
+	    if ( int(todayData['night']['chance_precip'] ) > 40 ):
+	        lookupString = "Tonight will be " + str( todayData['night']['text'] ) + " with a chance of showers"
+	    else:
+	        lookupString = "Tonight will be " + str( todayData['night']['text'] )
+
+	### Tomorrow Night
+	elif ( re.compile( "tomorrow night", re.IGNORECASE).findall( string ,1 )):
+	    todayData = weather_com_result['forecasts'][1]
+	    if ( int(todayData['night']['chance_precip'] ) > 40 ):
+	        lookupString = "Tomorrow night will be " + str( todayData['night']['text'] ) + " with a chance of showers"
+	    else:
+	        lookupString = "Tomorrow night will be " + str( todayData['night']['text'] )
+
+	### TODAY
+	elif ( re.compile( "tomorrow", re.IGNORECASE ).findall( string ,1 )):
+	    todayData = weather_com_result['forecasts'][1]
+	    if ( todayData['day']['text'] != 'N/A' ):
+		    if (( int( todayData['day']['chance_precip'] ) > 40 ) or ( int( todayData['night']['chance_precip'] ) > 40 )):
+		        lookupString = "Tomorrow will be " + str( todayData['day']['text'] ) + " with a chance of showers and a high of " + str( todayData['high'] ) + " degrees"
+		    else:
+		        lookupString = "Tomorrow will be " + str( todayData['day']['text'] ) + " with a high of " + str( todayData['high'] ) + "degrees"
+
+
+	else:
+	    lookupString = "It is currently " + str(weather_com_result['current_conditions']['text']) + " and " + weather_com_result['current_conditions']['temperature'] + "degrees.\n\n" 
+
+
+	print lookupString
+	## Work our magic
+	if ( lookupString != '' ):
+	    GoogleSpeech.tts( lookupString )
+	else: 
+	    GoogleSpeech.tts( "Sorry, Weather information un-available at this time, please try again later" )
+        
+
+
 	
 
 if(__name__ == '__main__'):

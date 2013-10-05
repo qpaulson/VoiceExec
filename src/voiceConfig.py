@@ -21,7 +21,7 @@ class VoiceConfig:
     def loadConfig(self):
         print 'CONFIG: Loading Configuration File'
         self.configuration.read(['conf/voiceExec.conf', os.path.expanduser('~/.voiceExec.conf')])
-        print self.configuration.items('System Commands')
+        #print self.configuration.items('System Commands')
         print 'CONFIG: Configuration File Loaded'
         key = 'record_rate'
         if self.configuration.has_option('System Config', key):
