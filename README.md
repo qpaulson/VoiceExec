@@ -39,7 +39,7 @@ Non Python Requrements
 Built In Modules
 ================
 
- - Weather:  
+* Weather:  
 	
 	This is a built in weather module that searches the weather using the weather.com API.  It understands basic weather requests including:
 		- Weather Today? ( i.e. Whats the weather going to be like Today? )
@@ -52,13 +52,16 @@ Built In Modules
 	Its in its early stages, so it may say some interesting things. :) 
 
 
-- Downloader:
+
+* Downloader:
 	
 	This is a built in BitTorrent initiator client for Transmission.  It takes your voice query and downlaods a matching torrent.
 
 	To use this module you need to have:
 		- A Transmission torrent app/rpc server running somewhere that the module can connect to. ( the rpc server is enabled if you enabled the web UI )
 		- Your VoiceExec Downloader section configured correctly
+
+	Example: "Download Debian" -> This will download the latest debian ISO
 
 	This tool currently uses ThePirateBay as its source of torrents.
 		
