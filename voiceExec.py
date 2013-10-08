@@ -26,6 +26,7 @@ if cmd_subfolder not in sys.path:
 from googleSpeech import GoogleSpeech
 from voiceConfig import VoiceConfig
 from voiceWeather import VoiceWeather
+from voiceDownloader import VoiceDownloader
 
 
 
@@ -38,6 +39,10 @@ def runCommand( string ):
             textString = ''
 	    if ( cmd == "class:weather" ):
                 VoiceWeather.speakWeather( vConfig, string )
+	    elif ( cmd == "class:download" ):
+		downloadString = string[string.find(' '):]
+                dl_result = VoiceDownloader.download( vConfig, downloadString )
+		GoogleSpeech.tts( dl_result )
 	    else:	
 	        p = Popen(cmd, shell=True, stdout=PIPE)
 	        textString = p.communicate()[0].rstrip()
