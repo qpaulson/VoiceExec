@@ -34,6 +34,34 @@ Non Python Requrements
  - mplayer ( the mplayer command needs to be in your path )
 
 
+
+
+Built In Modules
+================
+
+ - Weather:  
+	
+	This is a built in weather module that searches the weather using the weather.com API.  It understands basic weather requests including:
+		- Weather Today? ( i.e. Whats the weather going to be like Today? )
+		- Weather Tonight? ( i.e. Whats the weather look like Tonight? )
+		- Weather Tomrrow? ( i.e. Hows the weather going to look Tomorrow? )
+
+	To make weather work, you need to set your location in the voiceExec configuration file.  
+	You can find your code here: http://aspnetresources.com/tools/weatherIdResolver
+
+	Its in its early stages, so it may say some interesting things. :) 
+
+
+- Downloader:
+	
+	This is a built in BitTorrent initiator client for Transmission.  It takes your voice query and downlaods a matching torrent.
+
+	To use this module you need to have:
+		- A Transmission torrent app/rpc server running somewhere that the module can connect to. ( the rpc server is enabled if you enabled the web UI )
+		- Your VoiceExec Downloader section configured correctly
+
+	This tool currently uses ThePirateBay as its source of torrents.
+		
 	
 
 Have Fun!
