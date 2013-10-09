@@ -21,9 +21,6 @@ You will need to install the following Python Libraries
  - pyaudio ( Device Control & Recording )
 	https://pypi.python.org/pypi/PyAudio
 
- - pywapi ( Weather module - Source and License included within this app )
-
-
 
 
 Non Python Requrements
