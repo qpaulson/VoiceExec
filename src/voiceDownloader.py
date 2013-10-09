@@ -12,19 +12,25 @@ import re
 class VoiceDownloader:
 
 	@staticmethod
-	def searchTorrents( string ):
+	def searchTorrents( site, string ):
 	    encodedString = urllib.quote_plus( string )
 	    #print encodedString
+	    torrentSearchUrl = ''		
+	    reg = re.compile("")
+            if ( site == "thepiratebay" ):
+		    torrentSearchUrl = 'http://thepiratebay.sx/search/' + encodedString + '/0/7/0'
+		    reg = re.compile("<a href=\"magnet:(.+?)\" ")
+	    else:
+		    torrentSearchUrl = 'http://publichd.se/index.php?page=torrents&active=1&search=' + encodedString + '&order=5&by=2'
+		    reg = re.compile("<a href=magnet:(.+?)>")
 
-	    torrentSearchUrl = 'http://thepiratebay.sx/search/' + encodedString + '/0/7/0'
 	    hrs = {"User-Agent": "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.63 Safari/535.7"}
 	    req = urllib2.Request( torrentSearchUrl, headers=hrs)
 	    res = urllib2.urlopen(req)
 
 	    #write intermediate MP3 file
 	    html_body = res.read()
-	    #print html_body
-	    reg = re.compile("<a href=\"magnet:(.+?)\" ")
+	    print html_body
 	    linksList = reg.findall( html_body, 1)
 
 	    if ( len(linksList) > 0 ):
@@ -69,8 +75,9 @@ class VoiceDownloader:
 	    trans_user = vConfig.get( "downloader", "trans_user" )
 	    trans_pass = vConfig.get( "downloader", "trans_pass" )
 	    trans_destination = vConfig.get( "downloader", "trans_destination" )
+	    site = vConfig.get( "downloader", "torrent_site" )
 
-	    linkUrl = VoiceDownloader.searchTorrents( str( string ))
+	    linkUrl = VoiceDownloader.searchTorrents( site, str( string ))
 	    if ( linkUrl is not None ):
 		return VoiceDownloader.postMagnetLink( trans_url, trans_user, trans_pass,  linkUrl , trans_destination )
 	    else:
@@ -87,12 +94,11 @@ if(__name__ == '__main__'):
 
         # This can be built up to work outside of VoiceExec.. but I've not done anything with this part other than for testing	
 	trans_url = "http://192.168.1.88:9091"
-	#trans_url = "http://24.86.233.135:9091"
 	trans_user = "trans_user"
 	trans_pass = "trans_pass"
 	trans_destination = "/Volumes/Downloads/incoming"
 
-	linkUrl = VoiceDownloader.searchTorrents( str( searchString ))
+	linkUrl = VoiceDownloader.searchTorrents( 'not_thepiratebay', str( searchString ))
 	if ( linkUrl is not None ):
 		VoiceDownloader.postMagnetLink( trans_url, trans_user, trans_pass,  linkUrl , trans_destination )
 
