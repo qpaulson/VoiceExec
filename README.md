@@ -64,6 +64,18 @@ Built In Modules
 	Example: "Download Debian" -> This will download the latest debian ISO
 
 	This tool currently uses ThePirateBay as its source of torrents.
+
+* Hue\_Lights:
+
+	This is a built in controller for Phillips Hue lights.  As noted above, it requires the phue module to be installed. It understands basic commands currently including:
+		- lights kitchen off - This would turn the lights either in a kitchen group or labeled as kitchen off
+		- lights kitchen on - This would turn the lights either in the kitchen group or labeled as kitchen on
+		- lights kitchen dim 100 - This would dim the light or group of lights labeled as kitchen by 100
+		- lights kitchen increase brightness by 100 - This would increase the brightness of the light or group of lights labeled as kitchen by 100
+		- lights kitchen set to maximum brightness - This would set the brightness of the light or group of lights from its current value to the max value of 254
+		- lights kitchen set to minimum - This would set the brightness of the light or group of lights from its current value to the minimum value of 0
+
+	Colors and schedules to come. :) 
 		
 	
 
