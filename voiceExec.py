@@ -27,6 +27,7 @@ from googleSpeech import GoogleSpeech
 from voiceConfig import VoiceConfig
 from voiceWeather import VoiceWeather
 from voiceDownloader import VoiceDownloader
+from voiceHue import VoiceHue
 
 
 
@@ -43,6 +44,19 @@ def runCommand( string ):
 		downloadString = string[string.find(' '):]
                 dl_result = VoiceDownloader.download( vConfig, downloadString )
 		GoogleSpeech.tts( dl_result )
+	    elif ( cmd == "class:hue_lights" ):
+		hueController = VoiceHue.VoiceHue()
+		hueController.controlByCommand( string )
+		lights = hueController.getLights()
+		print lights
+
+		groups = hueController.getGroups()
+		print groups
+
+		#hueController.toggleByName( "kitchen" )
+		hueController.dimByName( "kitchen" , -50)
+		hueController.dimByName( "kitchen" , +50)
+
 	    else:	
 	        p = Popen(cmd, shell=True, stdout=PIPE)
 	        textString = p.communicate()[0].rstrip()

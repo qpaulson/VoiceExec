@@ -30,6 +30,9 @@ Non Python Requrements
  
  - mplayer ( the mplayer command needs to be in your path )
 
+ - phue ( required if you intend to use the hue lights plugin ( class:hue\_lights ) in the configuration.
+	This is available via pip as phue
+
 
 
 
