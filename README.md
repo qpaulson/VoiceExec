@@ -41,10 +41,10 @@ Built In Modules
 
 * Weather:  
 	
-	This is a built in weather module that searches the weather using the weather.com API.  It understands basic weather requests including:
-		- Weather Today? ( i.e. Whats the weather going to be like Today? )
-		- Weather Tonight? ( i.e. Whats the weather look like Tonight? )
-		- Weather Tomrrow? ( i.e. Hows the weather going to look Tomorrow? )
+	This is a built in weather module that searches the weather using the weather.com API.  It understands basic weather requests including:    
+		> Weather Today? ( i.e. Whats the weather going to be like Today? )    
+		> Weather Tonight? ( i.e. Whats the weather look like Tonight? )    
+		> Weather Tomrrow? ( i.e. Hows the weather going to look Tomorrow? )       
 
 	To make weather work, you need to set your location in the voiceExec configuration file.  
 	You can find your code here: http://aspnetresources.com/tools/weatherIdResolver
@@ -57,9 +57,9 @@ Built In Modules
 	
 	This is a built in BitTorrent initiator client for Transmission.  It takes your voice query and downlaods a matching torrent.
 
-	To use this module you need to have:
-		- A Transmission torrent app/rpc server running somewhere that the module can connect to. ( the rpc server is enabled if you enabled the web UI )
-		- Your VoiceExec Downloader section configured correctly
+	To use this module you need to have:    
+		> A Transmission torrent app/rpc server running somewhere that the module can connect to. ( the rpc server is enabled if you enabled the web UI )    
+		> Your VoiceExec Downloader section configured correctly    
 
 	Example: "Download Debian" -> This will download the latest debian ISO
 
@@ -67,13 +67,13 @@ Built In Modules
 
 * Hue\_Lights:
 
-	This is a built in controller for Phillips Hue lights.  As noted above, it requires the phue module to be installed. It understands basic commands currently including:
-		- lights kitchen off - This would turn the lights either in a kitchen group or labeled as kitchen off
-		- lights kitchen on - This would turn the lights either in the kitchen group or labeled as kitchen on
-		- lights kitchen dim 100 - This would dim the light or group of lights labeled as kitchen by 100
-		- lights kitchen increase brightness by 100 - This would increase the brightness of the light or group of lights labeled as kitchen by 100
-		- lights kitchen set to maximum brightness - This would set the brightness of the light or group of lights from its current value to the max value of 254
-		- lights kitchen set to minimum - This would set the brightness of the light or group of lights from its current value to the minimum value of 0
+	This is a built in controller for Phillips Hue lights.  As noted above, it requires the phue module to be installed. It understands basic commands currently including:    
+		> lights kitchen off - This would turn the lights either in a kitchen group or labeled as kitchen off    
+		> lights kitchen on - This would turn the lights either in the kitchen group or labeled as kitchen on    
+		> lights kitchen dim 100 - This would dim the light or group of lights labeled as kitchen by 100     
+		> lights kitchen increase brightness by 100 - This would increase the brightness of the light or group of lights labeled as kitchen by 100     
+		> lights kitchen set to maximum brightness - This would set the brightness of the light or group of lights from its current value to the max value of 254     
+		> lights kitchen set to minimum - This would set the brightness of the light or group of lights from its current value to the minimum value of 0     
 
 	Colors and schedules to come. :) 
 		
