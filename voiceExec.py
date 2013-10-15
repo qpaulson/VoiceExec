@@ -35,9 +35,8 @@ p = pyaudio.PyAudio()
 
 def runCommand( string ):
 	cmd = vConfig.getConfig( string )
+        textString = ''
 	if ( cmd is not None ):
-
-            textString = ''
 	    if ( cmd == "class:weather" ):
                 VoiceWeather.speakWeather( vConfig, string )
 	    elif ( cmd == "class:download" ):
@@ -45,7 +44,7 @@ def runCommand( string ):
                 dl_result = VoiceDownloader.download( vConfig, downloadString )
 		GoogleSpeech.tts( dl_result )
 	    elif ( cmd == "class:hue_lights" ):
-		hueController = VoiceHue.VoiceHue()
+		hueController = VoiceHue()
 		hueController.controlByCommand( string )
 		lights = hueController.getLights()
 		print lights
